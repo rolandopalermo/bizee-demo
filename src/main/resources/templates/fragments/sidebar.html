@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar (activeNav, offcanvas)"
+	   th:class="${offcanvas} ? 'p-3' : 'col-lg-auto d-none d-lg-flex flex-column app-sidebar app-sidebar-desktop p-3'">
+	<a class="app-sidebar-brand d-flex align-items-center mb-3"
+	   th:href="@{/home}"
+	   th:classappend="${offcanvas} ? ' d-none' : ''">
+		<i class="bi bi-building me-2" aria-hidden="true"></i>
+		<span>Bizee Demo</span>
+	</a>
+	<nav class="nav nav-pills flex-column gap-1" aria-label="Main">
+		<a class="nav-link"
+		   th:classappend="${activeNav == 'home'} ? ' active'"
+		   th:href="@{/home}"
+		   th:aria-current="${activeNav == 'home'} ? 'page' : _">
+			<i class="bi bi-house me-2" aria-hidden="true"></i>Home
+		</a>
+		<a class="nav-link"
+		   th:classappend="${activeNav == 'companies'} ? ' active'"
+		   th:href="@{/companies}"
+		   th:aria-current="${activeNav == 'companies'} ? 'page' : _">
+			<i class="bi bi-briefcase me-2" aria-hidden="true"></i>Companies
+		</a>
+		<a class="nav-link"
+		   th:classappend="${activeNav == 'registered-agents'} ? ' active'"
+		   th:href="@{/registered-agents}"
+		   th:aria-current="${activeNav == 'registered-agents'} ? 'page' : _">
+			<i class="bi bi-person-badge me-2" aria-hidden="true"></i>Registered agents
+		</a>
+		<a class="nav-link"
+		   th:classappend="${activeNav == 'users'} ? ' active'"
+		   th:href="@{/users}"
+		   th:aria-current="${activeNav == 'users'} ? 'page' : _">
+			<i class="bi bi-people me-2" aria-hidden="true"></i>Users
+		</a>
+	</nav>
+</aside>
+</body>
+</html>

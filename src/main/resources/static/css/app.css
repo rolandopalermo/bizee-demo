@@ -1,0 +1,28 @@
+:root {
+	--app-sidebar-width: 16rem;
+	--app-header-height: 3.5rem;
+	--app-surface: #f5f7fa;
+	--app-sidebar-bg: #1e293b;
+	--app-sidebar-text: #cbd5e1;
+	--app-sidebar-active: #ffffff;
+	--app-capacity-green: #2e7d32;
+	--app-capacity-yellow: #f9a825;
+	--app-capacity-red: #c62828;
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	min-height: 100%;
+}
+
+body.app-body {
+	background-color: var(--app-surface);
+}
+
+body.app-login-body {
+	background: linear-gradient(160deg, #e8eef5 0%, #f5f7fa 45%, #dfe7f1 100%);
+	min-height: 100vh;
+}

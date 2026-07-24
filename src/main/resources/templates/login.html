@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  th:replace="~{fragments/login-layout :: loginLayout('Bizee Demo — Login', ~{::section})}">
+<head>
+	<title>Bizee Demo — Login</title>
+</head>
+<body>
+<section class="row justify-content-center">
+	<div class="col-12">
+		<div class="card shadow-sm app-login-card mx-auto">
+			<div class="card-body p-4">
+				<div class="text-center mb-4">
+					<h1 class="h3 mb-2">Bizee Demo</h1>
+					<p class="text-secondary mb-0">Sign in with a seeded user email and password.</p>
+				</div>
+
+				<p class="form-text mb-3">
+					Example: <code>alice.johnson@example.com</code> /
+					<code>alice.johnson@example.com</code> (password matches email)
+				</p>
+
+				<div th:replace="~{fragments/ui :: alerts}"></div>
+
+				<form th:action="@{/login}"
+					  th:object="${loginForm}"
+					  method="post"
+					  data-app-validate
+					  novalidate>
+					<div class="mb-3">
+						<label class="form-label" for="email">Email</label>
+						<input class="form-control"
+							   type="email"
+							   id="email"
+							   th:field="*{email}"
+							   autocomplete="username"
+							   required/>
+						<div class="invalid-feedback">Please enter a valid email.</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label" for="password">Password</label>
+						<input class="form-control"
+							   type="password"
+							   id="password"
+							   th:field="*{password}"
+							   autocomplete="current-password"
+							   required/>
+						<div class="invalid-feedback">Password is required.</div>
+					</div>
+					<button type="submit" class="btn btn-primary w-100" data-app-loading-label="Signing in…">
+						Log in
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>
+</body>
+</html>

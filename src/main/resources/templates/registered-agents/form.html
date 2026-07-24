@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  th:replace="~{fragments/layout :: layout(${editing} ? 'Edit agent — Bizee Demo' : 'New agent — Bizee Demo', 'registered-agents', ~{::section})}">
+<head>
+	<title>Agent</title>
+</head>
+<body>
+<section>
+	<header class="app-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+		<div>
+			<h1 class="h3 mb-1" th:text="${editing} ? 'Edit agent' : 'New agent'">Agent</h1>
+			<p class="text-secondary mb-0">Registered agent profile and capacity.</p>
+		</div>
+		<a class="btn btn-outline-secondary" th:href="@{/registered-agents}">Back to list</a>
+	</header>
+
+	<div th:replace="~{fragments/ui :: alerts}"></div>
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<form th:object="${agentForm}"
+				  th:action="${editing} ? @{/registered-agents/{id}(id=${agentId})} : @{/registered-agents}"
+				  method="post"
+				  data-app-validate
+				  novalidate>
+				<div class="mb-3">
+					<label class="form-label" for="state">State</label>
+					<select class="form-select"
+							id="state"
+							th:field="*{state}"
+							th:classappend="${#fields.hasErrors('state')} ? ' is-invalid'"
+							required
+							data-states-select
+							th:attr="data-selected=*{state}">
+						<option value="">Select state</option>
+					</select>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('state')}"
+						 th:errors="*{state}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('state')}">Please select a state.</div>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" for="name">Name</label>
+					<input class="form-control"
+						   type="text"
+						   id="name"
+						   th:field="*{name}"
+						   th:classappend="${#fields.hasErrors('name')} ? ' is-invalid'"
+						   required
+						   maxlength="150"/>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('name')}"
+						 th:errors="*{name}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('name')}">Name is required.</div>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" for="email">Email</label>
+					<input class="form-control"
+						   type="email"
+						   id="email"
+						   th:field="*{email}"
+						   th:classappend="${#fields.hasErrors('email')} ? ' is-invalid'"
+						   required
+						   maxlength="255"/>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('email')}"
+						 th:errors="*{email}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('email')}">Enter a valid email.</div>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" for="capacity">Capacity (5–15)</label>
+					<input class="form-control"
+						   type="number"
+						   id="capacity"
+						   th:field="*{capacity}"
+						   th:classappend="${#fields.hasErrors('capacity')} ? ' is-invalid'"
+						   required
+						   min="5"
+						   max="15"/>
+					<div class="form-text">Allowed range is 5 to 15.</div>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('capacity')}"
+						 th:errors="*{capacity}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('capacity')}">Enter a capacity between 5 and 15.</div>
+				</div>
+
+				<div class="d-flex flex-wrap gap-2">
+					<button type="submit"
+							class="btn btn-primary"
+							th:text="${editing} ? 'Save' : 'Create'"
+							data-app-loading-label="Saving…">Save</button>
+					<a class="btn btn-outline-secondary" th:href="@{/registered-agents}">Cancel</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</section>
+</body>
+</html>

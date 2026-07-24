@@ -1,0 +1,71 @@
+---
+description: Require Spring Boot integration tests for every REST controller
+globs: "**/*Controller.java,**/controller/**/*.java,**/src/test/**/*IT.java,**/src/test/**/*IntegrationTest.java"
+alwaysApply: false
+---
+
+# Controller Integration Tests
+
+Every `@RestController` (and any Spring MVC `@Controller` that exposes HTTP APIs) **must** have Spring Boot integration tests that exercise the real web layer against the application's configured stack.
+
+## Required pattern
+
+Use **PostgreSQL and RabbitMQ Testcontainers** (via Spring Boot `@ServiceConnection`) so ITs do not depend on developer-local infrastructure. Prefer the shared base / config already in the project (`AbstractControllerIT`, `TestcontainersConfiguration`). Do **not** introduce H2 for controller ITs.
+
+```java
+// ✅ GOOD — full context + MockMvc against PostgreSQL + RabbitMQ Testcontainers
+// Spring Boot 4: org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+// Spring Boot 4: org.springframework.boot.testcontainers.service.connection.ServiceConnection
+@SpringBootTest
+@AutoConfigureMockMvc
+@Import(TestcontainersConfiguration.class)
+@Transactional // rollback so seed data is not permanently polluted
+class CompanyControllerIT {
+
+  @Autowired MockMvc mockMvc;
+
+  @Test
+  void createCompany_returnsCreated() throws Exception {
+    mockMvc.perform(post("/api/companies")
+            .header("X-User-Id", "1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"name":"IT Co","state":"CA","useRegisteredAgentService":false}
+                """))
+        .andExpect(status().isCreated());
+  }
+}
+
+// ❌ BAD — slice test only; does not satisfy full Spring Boot integration requirement alone
+@WebMvcTest(CompanyController.class)
+class CompanyControllerWebMvcTest { /* ... */ }
+
+// ❌ BAD — H2 instead of Postgres Testcontainer
+@SpringBootTest
+@TestPropertySource(properties = "spring.datasource.url=jdbc:h2:mem:test")
+class CompanyControllerIT { /* ... */ }
+
+// ❌ BAD — assumes manually started local Postgres/RabbitMQ without Testcontainers
+@SpringBootTest
+@AutoConfigureMockMvc
+class CompanyControllerIT { /* hits localhost by default */ }
+```
+
+## Coverage expectations
+
+When adding or changing a controller endpoint:
+
+1. Add or update an integration test under `src/test/java/...` (name `*IT` or `*IntegrationTest`).
+2. Hit the HTTP path with `MockMvc` (or `TestRestTemplate` if the project standardizes on it)—not only direct service calls.
+3. Assert status codes and key response fields; cover happy path and important error cases (validation, not found, business rules) when applicable.
+4. Prefer `@Transactional` rollback or explicit cleanup of rows created by the test; do not permanently destroy Flyway seed data.
+5. Flyway migrations (including V1 seed users/agents) must run against the Testcontainer; tests may rely on that seed.
+6. Domain events that publish on transaction commit will **not** fire under `@Transactional` test rollback — use a dedicated non-rollback IT (e.g. `DomainEventNotificationIT`) when asserting messaging side effects.
+
+## Prerequisites
+
+Docker must be available for Testcontainers to start PostgreSQL and RabbitMQ.
+
+## Scope
+
+This rule applies when editing controllers or their integration tests. Service-layer unit tests with Mockito do **not** satisfy this requirement.

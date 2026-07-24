@@ -1,0 +1,48 @@
+---
+description: Event-driven RabbitMQ notifications — DTOs, publish/consume services, domain decoupling
+globs: "**/event/**/*.java,**/service/**/*.java,**/*Rabbit*.java,**/*Event*.java"
+alwaysApply: false
+---
+
+# Event-Driven Messaging (RabbitMQ)
+
+Domain services publish **domain events**; consumers handle notification side effects. Do **not** call RabbitMQ inline from controllers or scatter `RabbitTemplate` usage inside domain methods beyond dedicated publisher services.
+
+## Layering
+
+- **HTTP**: RestController → Service → Repository (unchanged).
+- **Messaging** (parallel): Service → EventPublisher → RabbitMQ → EventConsumer → side effects (console “mail”, etc.).
+
+```java
+// ✅ GOOD — domain service publishes via dedicated publisher after successful assignment
+registeredAgentAssignedEventPublisher.publish(event);
+
+// ❌ BAD — RabbitTemplate / notify logic inside CompanyService or a controller
+rabbitTemplate.convertAndSend(...);
+log.info("emailing agent...");
+```
+
+## Event DTOs
+
+Each event has its **own payload DTO** under `event.dto` (records preferred). Do not reuse API request/response DTOs as message bodies.
+
+```java
+// ✅ GOOD
+public record RegisteredAgentAssignedEvent(
+    Long companyId, String companyName, String state,
+    Long registeredAgentId, String registeredAgentName, String registeredAgentEmail) {}
+```
+
+## Publish and consume services
+
+- **Publish**: one service per event (or clearly separated methods) under `event.publish`.
+- **Consume**: one listener service per event under `event.consume` with `@RabbitListener`.
+- Topology (exchanges, queues, bindings, routing keys) lives in `@Configuration` under `event.config` / `RabbitMqTopology` constants — not hard-coded in services.
+
+## Notifications
+
+Do **not** send real SMTP email in this demo. Consumers **log** simulated mail (recipient, subject, key fields).
+
+## Capacity threshold
+
+After a **service** RA assignment commits: if state utilization `(service-assigned companies / sum of RA capacities) >= 90%`, publish `StateCapacityThresholdReachedEvent`. Publishing on each assignment that leaves utilization ≥ 90% is acceptable (may repeat while at threshold).
