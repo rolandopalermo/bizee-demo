@@ -1,0 +1,79 @@
+---
+description: Spring Boot layered architecture — controllers, services, repositories, DTOs, and error handling
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# Spring Boot Architecture
+
+Base package: `com.bizee.demo.bizee_demo`. Prefer packages: `controller`, `service`, `repository`, `dto`, `domain` (entities), `advice` (or `exception`) for error handling, `auth` / `config` for session web auth, and `event` (`dto`, `publish`, `consume`, `config`) for messaging.
+
+## REST vs Thymeleaf
+
+- **REST** (`@RestController` under `/api/**`): JSON APIs; identity via `X-User-Id`. Do not require HTTP session.
+- **Browser UI** (`@Controller` + Thymeleaf under `src/main/resources/templates/`): session-based Demo login (`SessionAuth` + interceptor). Protect Thymeleaf routes only; exclude `/api/**` from the auth interceptor. Do **not** add Spring Security for this demo pattern.
+
+## Layered flow
+
+Use **RestController → Service → Repository** (and **Controller → Service** for Thymeleaf form flows). Controllers must not call repositories directly; repositories must not contain business logic.
+
+Messaging is a **parallel** concern: domain services publish domain events via dedicated publisher services; consumers handle side effects. See `event-driven-messaging.mdc`.
+
+```java
+// ✅ GOOD
+@RestController
+@RequestMapping("/api/companies")
+class CompanyController {
+  private final CompanyService companyService;
+  // delegates to service only
+}
+
+// ❌ BAD — controller talking to repository
+@RestController
+class CompanyController {
+  private final CompanyRepository companyRepository;
+}
+```
+
+## DTOs at the API boundary
+
+Use DTOs for request bodies and response payloads. Do **not** expose JPA entities from controllers.
+
+```java
+// ✅ GOOD
+@PostMapping
+CompanyResponse create(@RequestBody @Valid CreateCompanyRequest request) {
+  return companyService.create(request);
+}
+
+// ❌ BAD
+@GetMapping("/{id}")
+Company get(@PathVariable Long id) { // entity leaked to API
+  return companyRepository.findById(id).orElseThrow();
+}
+```
+
+Map between DTOs and entities in the service layer (or a dedicated mapper), not in the controller.
+
+## CRUD conventions
+
+- Prefer full REST CRUD under `/api/{resource}` with request/response DTOs; keep specialized sub-routes (e.g. company RA reassignment, capacity checks) alongside standard list/get/create/update/delete.
+- **Companies**: scope list/get/update/delete to the caller (`X-User-Id`); users manage only their own companies.
+- **Registered agents** and **users**: demo/admin CRUD (no ownership header); refuse deletes that would break assignments or company FKs; never expose user passwords in API responses.
+- **States**: public `GET /api/states` (no `X-User-Id`) returns `[{code, name}, …]` from `StatesService`. Thymeleaf state selects must not hardcode the list; populate via `/js/states-select.js` fetching that endpoint.
+- Thymeleaf list/form/delete pages call the same services as REST; do not duplicate business rules in web controllers.
+
+## Centralized error handling
+
+Use a single `@RestControllerAdvice` (or `@ControllerAdvice`) for API exceptions. Prefer domain/application exceptions from services; map them to HTTP responses in the advisor—avoid scattering try/catch and ad-hoc error bodies in controllers.
+
+```java
+@RestControllerAdvice
+class ApiExceptionHandler {
+  @ExceptionHandler(EntityNotFoundException.class)
+  ResponseEntity<ErrorResponse> notFound(EntityNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new ErrorResponse(ex.getMessage()));
+  }
+}
+```

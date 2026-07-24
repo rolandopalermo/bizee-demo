@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  th:replace="~{fragments/layout :: layout('Welcome — Bizee Demo', 'home', ~{::section})}">
+<head>
+	<title>Welcome — Bizee Demo</title>
+</head>
+<body>
+<section>
+	<header class="app-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+		<div>
+			<h1 class="h3 mb-1">Welcome</h1>
+			<p class="text-secondary mb-0">Overview of the admin tools available in this demo.</p>
+		</div>
+	</header>
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<p class="mb-3">
+				You are signed in as
+				<strong th:text="${displayName}">user</strong>
+				<span th:if="${email}">(<span th:text="${email}">email</span>)</span>.
+			</p>
+			<p class="text-secondary">
+				Manage domain data in the browser, or call REST under
+				<code>/api/**</code> with <code>X-User-Id</code> (no session required).
+			</p>
+			<ul class="list-unstyled mb-0">
+				<li class="mb-2">
+					<a th:href="@{/companies}">Companies</a>
+					<span class="text-secondary"> — all companies, optional filter by owner</span>
+				</li>
+				<li class="mb-2">
+					<a th:href="@{/registered-agents}">Registered agents</a>
+					<span class="text-secondary"> — admin/demo CRUD</span>
+				</li>
+				<li>
+					<a th:href="@{/users}">Users</a>
+					<span class="text-secondary"> — admin/demo CRUD</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+</section>
+</body>
+</html>

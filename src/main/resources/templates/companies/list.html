@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  th:replace="~{fragments/layout :: layout('Companies — Bizee Demo', 'companies', ~{::section})}">
+<head>
+	<title>Companies — Bizee Demo</title>
+</head>
+<body>
+<section>
+	<header class="app-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+		<div>
+			<h1 class="h3 mb-1">Companies</h1>
+			<p class="text-secondary mb-0">Browse and manage companies, optionally filtered by owner.</p>
+		</div>
+		<a class="btn btn-primary" th:href="@{/companies/new}">
+			<i class="bi bi-plus-lg me-1" aria-hidden="true"></i>New company
+		</a>
+	</header>
+
+	<div th:replace="~{fragments/ui :: alerts}"></div>
+
+	<div class="card shadow-sm mb-3">
+		<div class="card-body">
+			<form class="row g-3 align-items-end" method="get" th:action="@{/companies}">
+				<div class="col-md-6 col-lg-4">
+					<label class="form-label" for="userId">Filter by user</label>
+					<select class="form-select" id="userId" name="userId">
+						<option value="" th:selected="${filterUserId == null}">All users</option>
+						<option th:each="u : ${users}"
+								th:value="${u.id()}"
+								th:text="${u.name() + ' (' + u.email() + ')'}"
+								th:selected="${filterUserId != null and u.id() == filterUserId}">User</option>
+					</select>
+				</div>
+				<div class="col-auto">
+					<button type="submit" class="btn btn-outline-secondary">Apply</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="card shadow-sm">
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table table-hover align-middle mb-0">
+					<thead class="table-light">
+					<tr>
+						<th scope="col">ID</th>
+						<th scope="col">Name</th>
+						<th scope="col">Owner</th>
+						<th scope="col">State</th>
+						<th scope="col">RA type</th>
+						<th scope="col">RA id</th>
+						<th scope="col" class="text-end">Actions</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr th:each="c : ${companies}">
+						<td th:text="${c.id()}">1</td>
+						<td th:text="${c.name()}">Name</td>
+						<td th:text="${c.userName() + ' (' + c.userEmail() + ')'}">Alice (alice@example.com)</td>
+						<td th:text="${c.state()}">CA</td>
+						<td>
+							<span class="badge text-bg-secondary" th:text="${c.registeredAgentType().value}">user</span>
+						</td>
+						<td th:text="${c.registeredAgentId()}">1</td>
+						<td class="text-end app-table-actions">
+							<a class="btn btn-outline-primary btn-sm"
+							   th:href="@{/companies/{id}/edit(id=${c.id()})}">Edit</a>
+							<form class="d-inline"
+								  th:action="@{/companies/{id}/delete(id=${c.id()})}"
+								  method="post"
+								  data-app-confirm="Delete this company? This cannot be undone.">
+								<button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+							</form>
+						</td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(companies)}">
+						<td colspan="7" class="text-center text-secondary py-4">No companies found.</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</section>
+</body>
+</html>

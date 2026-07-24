@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  th:replace="~{fragments/layout :: layout('Registered agents — Bizee Demo', 'registered-agents', ~{::section})}">
+<head>
+	<title>Registered agents — Bizee Demo</title>
+</head>
+<body>
+<section>
+	<header class="app-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+		<div>
+			<h1 class="h3 mb-1">Registered agents</h1>
+			<p class="text-secondary mb-0">Agents available for company assignment; optionally filter by state.</p>
+		</div>
+		<a class="btn btn-primary" th:href="@{/registered-agents/new}">
+			<i class="bi bi-plus-lg me-1" aria-hidden="true"></i>New agent
+		</a>
+	</header>
+
+	<div th:replace="~{fragments/ui :: alerts}"></div>
+
+	<div class="card shadow-sm mb-3">
+		<div class="card-body">
+			<form class="row g-3 align-items-end" method="get" th:action="@{/registered-agents}">
+				<div class="col-md-6 col-lg-4">
+					<label class="form-label" for="state">Filter by state</label>
+					<select class="form-select" id="state" name="state">
+						<option value="" th:selected="${filterState == null}">All states</option>
+						<option th:each="s : ${states}"
+								th:value="${s.code()}"
+								th:text="${s.code() + ' — ' + s.name()}"
+								th:selected="${filterState != null and s.code() == filterState}">CA — California</option>
+					</select>
+				</div>
+				<div class="col-auto">
+					<button type="submit" class="btn btn-outline-secondary">Apply</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="card shadow-sm">
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table table-hover align-middle mb-0">
+					<thead class="table-light">
+					<tr>
+						<th scope="col">ID</th>
+						<th scope="col">State</th>
+						<th scope="col">Name</th>
+						<th scope="col">Email</th>
+						<th scope="col">Capacity</th>
+						<th scope="col" class="text-end">Actions</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr th:each="a : ${agents}">
+						<td th:text="${a.id()}">1</td>
+						<td th:text="${a.state()}">CA</td>
+						<td th:text="${a.name()}">Name</td>
+						<td th:text="${a.email()}">email</td>
+						<td>
+							<span class="app-capacity"
+								  th:with="level=${a.capacityColorClass() == 'capacity-green' ? 'Low utilization' : (a.capacityColorClass() == 'capacity-yellow' ? 'Moderate utilization' : 'High utilization')}">
+								<span th:class="'app-capacity-swatch ' + ${a.capacityColorClass()}"
+									  th:attr="aria-label=${level}"
+									  role="img"></span>
+								<span th:text="${a.assignedCount() + '/' + a.capacity()}">0/5</span>
+								<span class="visually-hidden" th:text="${level}">status</span>
+							</span>
+						</td>
+						<td class="text-end app-table-actions">
+							<a class="btn btn-outline-primary btn-sm"
+							   th:href="@{/registered-agents/{id}/edit(id=${a.id()})}">Edit</a>
+							<form class="d-inline"
+								  th:action="@{/registered-agents/{id}/delete(id=${a.id()})}"
+								  method="post"
+								  data-app-confirm="Delete this registered agent? This cannot be undone.">
+								<button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+							</form>
+						</td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(agents)}">
+						<td colspan="6" class="text-center text-secondary py-4">No registered agents found.</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</section>
+</body>
+</html>

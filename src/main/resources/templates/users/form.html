@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  th:replace="~{fragments/layout :: layout(${editing} ? 'Edit user — Bizee Demo' : 'New user — Bizee Demo', 'users', ~{::section})}">
+<head>
+	<title>User</title>
+</head>
+<body>
+<section>
+	<header class="app-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+		<div>
+			<h1 class="h3 mb-1" th:text="${editing} ? 'Edit user' : 'New user'">User</h1>
+			<p class="text-secondary mb-0">Create or update a user account.</p>
+		</div>
+		<a class="btn btn-outline-secondary" th:href="@{/users}">Back to list</a>
+	</header>
+
+	<div th:replace="~{fragments/ui :: alerts}"></div>
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<form th:object="${userForm}"
+				  th:action="${editing} ? @{/users/{id}(id=${userId})} : @{/users}"
+				  method="post"
+				  data-app-validate
+				  novalidate>
+				<div class="mb-3">
+					<label class="form-label" for="name">Name</label>
+					<input class="form-control"
+						   type="text"
+						   id="name"
+						   th:field="*{name}"
+						   th:classappend="${#fields.hasErrors('name')} ? ' is-invalid'"
+						   required
+						   maxlength="150"/>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('name')}"
+						 th:errors="*{name}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('name')}">Name is required.</div>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" for="email">Email</label>
+					<input class="form-control"
+						   type="email"
+						   id="email"
+						   th:field="*{email}"
+						   th:classappend="${#fields.hasErrors('email')} ? ' is-invalid'"
+						   required
+						   maxlength="255"/>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('email')}"
+						 th:errors="*{email}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('email')}">Enter a valid email.</div>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" for="password">Password</label>
+					<input class="form-control"
+						   type="password"
+						   id="password"
+						   th:field="*{password}"
+						   th:classappend="${#fields.hasErrors('password')} ? ' is-invalid'"
+						   maxlength="255"
+						   th:required="${!editing}"
+						   th:placeholder="${editing} ? 'Leave blank to keep current' : ''"
+						   autocomplete="new-password"/>
+					<div class="form-text" th:if="${editing}">Leave blank to keep the current password.</div>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('password')}"
+						 th:errors="*{password}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('password')}">Password is required.</div>
+				</div>
+
+				<div class="d-flex flex-wrap gap-2">
+					<button type="submit"
+							class="btn btn-primary"
+							th:text="${editing} ? 'Save' : 'Create'"
+							data-app-loading-label="Saving…">Save</button>
+					<a class="btn btn-outline-secondary" th:href="@{/users}">Cancel</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</section>
+</body>
+</html>

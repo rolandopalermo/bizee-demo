@@ -1,0 +1,47 @@
+.app-page-header {
+	margin-bottom: 1.25rem;
+}
+
+.app-table-actions {
+	white-space: nowrap;
+}
+
+.app-table-actions form {
+	display: inline;
+}
+
+.app-capacity {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.app-capacity-swatch {
+	display: inline-block;
+	width: 0.75rem;
+	height: 0.75rem;
+	border: 1px solid rgba(0, 0, 0, 0.25);
+	border-radius: 0.125rem;
+	flex-shrink: 0;
+}
+
+.capacity-green {
+	background-color: var(--app-capacity-green);
+}
+
+.capacity-yellow {
+	background-color: var(--app-capacity-yellow);
+}
+
+.capacity-red {
+	background-color: var(--app-capacity-red);
+}
+
+.app-btn-loading .spinner-border {
+	width: 0.9rem;
+	height: 0.9rem;
+}
+
+.app-owner-muted {
+	margin-top: 0.25rem;
+}

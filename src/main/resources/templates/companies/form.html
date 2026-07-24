@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+	  th:replace="~{fragments/layout :: layout(${editing} ? 'Edit company — Bizee Demo' : 'New company — Bizee Demo', 'companies', ~{::section})}">
+<head>
+	<title>Company</title>
+</head>
+<body>
+<section>
+	<header class="app-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+		<div>
+			<h1 class="h3 mb-1" th:text="${editing} ? 'Edit company' : 'New company'">Company</h1>
+			<p class="text-secondary mb-0">Company details and registered agent preference.</p>
+		</div>
+		<a class="btn btn-outline-secondary" th:href="@{/companies}">Back to list</a>
+	</header>
+
+	<div th:replace="~{fragments/ui :: alerts}"></div>
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<form th:object="${companyForm}"
+				  th:action="${editing} ? @{/companies/{id}(id=${companyId})} : @{/companies}"
+				  method="post"
+				  data-app-validate
+				  novalidate>
+				<div class="mb-3">
+					<span class="form-label">Owner</span>
+					<p class="form-control-plaintext app-owner-muted mb-0" th:text="${ownerDisplay}">Owner</p>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" for="name">Name</label>
+					<input class="form-control"
+						   type="text"
+						   id="name"
+						   th:field="*{name}"
+						   th:classappend="${#fields.hasErrors('name')} ? ' is-invalid'"
+						   required
+						   maxlength="200"/>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('name')}"
+						 th:errors="*{name}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('name')}">Name is required.</div>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" for="state">State</label>
+					<select class="form-select"
+							id="state"
+							th:field="*{state}"
+							th:classappend="${#fields.hasErrors('state')} ? ' is-invalid'"
+							required
+							data-states-select
+							th:attr="data-selected=*{state}">
+						<option value="">Select state</option>
+					</select>
+					<div class="invalid-feedback"
+						 th:if="${#fields.hasErrors('state')}"
+						 th:errors="*{state}">err</div>
+					<div class="invalid-feedback" th:unless="${#fields.hasErrors('state')}">Please select a state.</div>
+				</div>
+
+				<div class="mb-3 form-check">
+					<input class="form-check-input"
+						   type="checkbox"
+						   id="useRegisteredAgentService"
+						   th:field="*{useRegisteredAgentService}"/>
+					<label class="form-check-label" for="useRegisteredAgentService">
+						Use registered agent service
+					</label>
+				</div>
+
+				<div class="d-flex flex-wrap gap-2">
+					<button type="submit"
+							class="btn btn-primary"
+							th:text="${editing} ? 'Save' : 'Create'"
+							data-app-loading-label="Saving…">Save</button>
+					<a class="btn btn-outline-secondary" th:href="@{/companies}">Cancel</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</section>
+</body>
+</html>
